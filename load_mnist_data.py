@@ -14,7 +14,44 @@ os.chdir(project_dir)
 
 dataset_path  = './data/mnist'
 
+def subset_fn(tr_x,tr_y,te_x,te_y,digit_range):
+    
+    # creating an array of the required digits
+    subset_label = np.arange(digit_range[0],digit_range[1]+1)
+    train_data_sub = []
+    train_label_sub = []
+    test_data_sub = []
+    test_label_sub = []
+    
+    for i in subset_label:
+        
+        # returns a tuple whose 1st elements is the required array 
+        train_sub_idx = np.where(tr_y==i)
+        test_sub_idx = np.where(te_y==i)
+        A = tr_x[train_sub_idx[0],:]
+        C = te_x[test_sub_idx[0],:]
 
+        B = tr_y[train_sub_idx[0]]
+        D = te_y[test_sub_idx[0]]
+			
+        train_data_sub.append(A)
+        train_label_sub.append(B)
+        test_data_sub.append(C)
+        test_label_sub.append(D)
+    
+    # finally creating the list of the required digits
+    tr_x = train_data_sub[0]
+    tr_y = train_label_sub[0]
+    te_x = test_data_sub[0]
+    te_y = test_label_sub[0]
+    
+    for i in range(digit_range[1]-digit_range[0]):
+        tr_x = np.concatenate((tr_x,train_data_sub[i+1]),axis=0)
+        tr_y = np.concatenate((tr_y,train_label_sub[i+1]),axis=0)
+        te_x = np.concatenate((te_x,test_data_sub[i+1]),axis=0)
+        te_y = np.concatenate((te_y,test_label_sub[i+1]),axis=0)
+     
+    return tr_x,tr_y,te_x,te_y
 
     
 def mnist(ntrain=60000,ntest=10000,subset=True,digit_range=[0,2],shuffle=True):
