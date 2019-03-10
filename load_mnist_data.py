@@ -53,6 +53,18 @@ def subset_fn(tr_x,tr_y,te_x,te_y,digit_range):
      
     return tr_x,tr_y,te_x,te_y
 
+def shuffle_fn(tr_x,tr_y,te_x,te_y):
+    train_idx = np.random.permutation(tr_x.shape[0])
+    test_idx = np.random.permutation(te_x.shape[0])
+    
+    tr_x = tr_x[train_idx,:]
+    te_x = te_x[test_idx,:]
+    
+    tr_y = tr_y[train_idx]
+    te_y = te_y[test_idx]
+    
+    
+    return tr_x,tr_y,te_x,te_y
     
 def mnist(ntrain=60000,ntest=10000,subset=True,digit_range=[0,2],shuffle=True):
     
@@ -93,7 +105,8 @@ def mnist(ntrain=60000,ntest=10000,subset=True,digit_range=[0,2],shuffle=True):
     if subset:
         tr_x,tr_y,te_x,te_y = subset_fn(tr_x,tr_y,te_x,te_y,digit_range)
             
-
+    if shuffle:
+        tr_x,tr_y,te_x,te_y = shuffle_fn(tr_x,tr_y,te_x,te_y)
             
     return tr_x,tr_y,te_x,te_y
 
