@@ -14,7 +14,7 @@ from load_mnist_data import mnist
 def create_placeholder(n_x):
     
     x_ph = tf.placeholder(tf.float32,shape=[None,n_x],name='X_ph')
-    y_ph = tf.placeholder(tf.float32,shape=[None,1],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
+    y_ph = tf.placeholder(tf.int32,shape=[None],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
     
     return x_ph,y_ph
 
@@ -221,8 +221,8 @@ if __name__ == '__main__':
     tr_x = tr_x.take(req_index,axis = 0) # doing the subset of the 6k records
     tr_y = tr_y.take(req_index,axis = 0) # doing the subset of the 6k records
     
-    tr_y = tr_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
-    te_y = te_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
+    #tr_y = tr_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
+    #te_y = te_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
     
     model(tr_x,tr_y,te_x,te_y)
     
