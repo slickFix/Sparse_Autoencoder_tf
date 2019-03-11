@@ -14,7 +14,7 @@ from load_mnist_data import mnist
 def create_placeholder(n_x):
     
     x_ph = tf.placeholder(tf.float32,shape=[None,n_x],name='X_ph')
-    y_ph = tf.placeholder(tf.int64,shape=[None],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
+    y_ph = tf.placeholder(tf.int64,shape=[None],name = 'Y_ph') 
     
     return x_ph,y_ph
 
@@ -123,14 +123,13 @@ def compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta):
     
     return loss
         
-def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=1e-3,rho=0.1,beta=3):
+def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-2,epochs = 1000,reg_term_lambda=1e-3,rho=0.1,beta=3):
     
     # tensorflow essentials
     tf.reset_default_graph()
     tf.set_random_seed(1)
     
     # getting the dimensions from the tr_x and tr_y
-    m = tr_x.shape[0]
     n_x = tr_x.shape[1]
     n_y = np.max(tr_y)-np.min(tr_y) + 1
     
@@ -181,7 +180,7 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
             if (epoch+1)%200 == 0:
                 print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_ae_fc))
         
-        print('Training fully connected(fc) network of dimensions [784,200,10].')
+        print('Training fully connected(fc) network of dimensions.')
         for epoch in range(epochs):
             
             _,c_fc = sess.run([optimizer_fc,cost_fc],feed_dict={x_ph:tr_x,y_ph:tr_y})
