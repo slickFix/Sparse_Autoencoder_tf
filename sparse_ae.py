@@ -128,7 +128,6 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
     # tensorflow essentials
     tf.reset_default_graph()
     tf.set_random_seed(1)
-    init = tf.global_variables_initializer()
     
     # getting the dimensions from the tr_x and tr_y
     m = tr_x.shape[0]
@@ -159,6 +158,8 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
     optimizer_ae_fc = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_ae_fc)
     optimizer_ae = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_ae)
     
+    
+    init = tf.global_variables_initializer()
     with tf.Session() as sess:
         sess.run(init)
         
