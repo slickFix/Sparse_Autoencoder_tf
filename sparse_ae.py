@@ -119,7 +119,7 @@ def compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta):
     w_ae = parameters['w_ae'] 
     l2_loss = reg_term_lambda*(tf.nn.l2_loss(w1)+tf.nn.l2_loss(w_ae))
     
-    loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1)+beta*kl+l2_loss)
+    loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1))+beta*kl+l2_loss
     
     return loss
         
