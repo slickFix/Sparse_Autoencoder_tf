@@ -122,10 +122,8 @@ def compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta):
     loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1)+beta*kl+l2_loss)
     
     return loss
-    
-    
-    
-def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e-3,rho=0.1,beta=3):
+        
+def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=1e-3,rho=0.1,beta=3):
     
     # tensorflow essentials
     tf.reset_default_graph()
@@ -155,6 +153,43 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e
     cost_fc = compute_cost_fc(logits_fc,y_ph,parameters,reg_term_lambda)
     cost_ae_fc = compute_cost_ae_fc(logits,y_ph,parameters,reg_term_lambda)
     cost_ae = compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta)
+    
+    # optimizers
+    optimizer_fc = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_fc)
+    optimizer_ae_fc = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_ae_fc)
+    optimizer_ae = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost_ae)
+    
+    with tf.Session() as sess:
+        sess.run(init)
+        
+        print('Training sparse autoencoder ')      
+        for epoch in range(epochs):
+            
+            _,c_ae = sess.run([optimizer_ae,cost_ae],feed_dict={x_ph:tr_x})
+            cost_ae_li.append(c_ae)
+            
+            if (epoch+1)%200 == 0:
+                print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_ae))
+        
+        print('Training softmax with classifier with autoencoder feature representation.')
+        for epoch in range(epochs):
+            
+            _,c_ae_fc = sess.run([optimizer_ae_fc,cost_ae_fc],feed_dict={x_ph:tr_x})
+            cost_ae_fc_li.append(c_ae_fc)
+            
+            if (epoch+1)%200 == 0:
+                print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_ae_fc))
+        
+        print('Training fully connected(fc) network of dimensions [784,200,10].')
+        for epoch in range(epochs):
+            
+            _,c_fc = sess.run([optimizer_fc,cost_fc],feed_dict={x_ph:tr_x})
+            cost_fc_li.append(c_fc)
+            
+            if (epoch+1)%200 == 0:
+                print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_fc))
+         
+        
 
 if __name__ == '__main__':
     
