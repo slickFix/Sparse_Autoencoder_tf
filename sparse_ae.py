@@ -14,7 +14,7 @@ from load_mnist_data import mnist
 def create_placeholder(n_x):
     
     x_ph = tf.placeholder(tf.float32,shape=[None,n_x],name='X_ph')
-    y_ph = tf.placeholder(tf.int32,shape=[None],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
+    y_ph = tf.placeholder(tf.int64,shape=[None],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
     
     return x_ph,y_ph
 
@@ -119,7 +119,7 @@ def compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta):
     w_ae = parameters['w_ae'] 
     l2_loss = reg_term_lambda*(tf.nn.l2_loss(w1)+tf.nn.l2_loss(w_ae))
     
-    loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1))+beta*kl+l2_loss
+    loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1))+beta*tf.reduce_sum(kl)+l2_loss
     
     return loss
         
@@ -193,7 +193,7 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
         correct_pred_ae_fc = tf.equal(tf.argmax(logits,axis=1),y_ph)
         acc_ae_fc = tf.reduce_mean(tf.cast(correct_pred_ae_fc,'float'))
         
-        correct_pred_fc = tf.equal(tf.argmax(logits_fc),y_ph)
+        correct_pred_fc = tf.equal(tf.argmax(logits_fc,axis=1),y_ph)
         acc_fc = tf.reduce_mean(tf.cast(correct_pred_fc,'float'))
         
         print("Accuracy of fc NN on test set",acc_fc.eval({x_ph:te_x,y_ph:te_y}))
