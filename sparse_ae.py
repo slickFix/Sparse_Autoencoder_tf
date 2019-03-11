@@ -20,6 +20,7 @@ def create_placeholder(n_x):
 
 def initialise_parameter(n_x,n_y):
     
+    # tf essentials
     wt_init = tf.variance_scaling_initializer()
     tf.set_random_seed(1)
     
@@ -44,18 +45,44 @@ def initialise_parameter(n_x,n_y):
     
     b_ae = tf.Variable(tf.zeros(n_x),dtype=tf.float32,name = 'b_ae')
     
-    parameters = {
-            'w1':w1,
-            'w2':w2,
+    parameters = {            
             'w1_fc':w1_fc,
             'w2_fc':w2_fc,
+            'w1':w1,
+            'w2':w2,
             'w_ae':w_ae,
-            'b1':b1,
-            'b2':b2,
             'b1_fc':b1_fc,
             'b2_fc':b2_fc,
+            'b1':b1,
+            'b2':b2,
             'b_ae':b_ae}
     return parameters
+
+def fwd_propagation(x_ph,parameters):
+    
+      
+    w1_fc = parameters['w1_fc']
+    w2_fc = parameters['w2_fc'] 
+    w1 = parameters['w1'] 
+    w2 = parameters['w2']  
+    w_ae = parameters['w_ae'] 
+    b1_fc = parameters['b1_fc']  
+    b2_fc = parameters['b2_fc']  
+    b1 = parameters['b1']  
+    b2 = parameters['b2'] 
+    b_ae = parameters['b_ae'] 
+    
+    l1_fc = tf.add(tf.matmul(x_ph,w1_fc),b1_fc)
+    l1_act_fc = tf.nn.relu(l1_fc)  
+    logits_fc = tf.add(tf.matmul(l1_act_fc,w2_fc),b2_fc)
+    
+    l1 = tf.add(tf.matmul(x_ph,w1),b1)
+    l1_act = tf.nn.relu(l1)    
+    logits = tf.add(tf.matmul(l1_act,w2),b2)
+    
+    x_hat = tf.nn.sigmoid(tf.add(tf.matmul(l1_act,w_ae),b_ae))
+    
+    return logits_fc,logits,x_hat
     
 def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e-3,rho=0.1,beta=3):
     
@@ -79,6 +106,9 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e
     
     # parameter initialisation
     parameters = initialise_parameter(n_x,n_y)
+    
+    # getting logits of 3 different NN
+    logits_fc,logits,x_hat = fwd_propagation(x_ph,parameters)
 
 if __name__ == '__main__':
     
