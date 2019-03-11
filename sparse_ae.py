@@ -11,6 +11,74 @@ import tensorflow as tf
 
 from load_mnist_data import mnist
 
+def create_placeholder(n_x):
+    
+    x_ph = tf.placeholder(tf.float32,shape=[None,n_x],name='X_ph')
+    y_ph = tf.placeholder(tf.float32,shape=[None,1],name = 'Y_ph') # using 1 instead of n_y as we will use sparse_softmax_crossentropy
+    
+    return x_ph,y_ph
+
+def initialise_parameter(n_x,n_y):
+    
+    wt_init = tf.variance_scaling_initializer()
+    tf.set_random_seed(1)
+    
+    neurons_h1 = 200
+    n_outputs = n_y
+    
+    # fully connected weights and bias
+    w1_fc = tf.Variable(wt_init([n_x,neurons_h1]),dtype = tf.float32,name = 'w1_fc')
+    w2_fc = tf.Variable(wt_init([neurons_h1,n_outputs]),dtype = tf.float32, name = 'w2_fc')
+    
+    b1_fc = tf.Variable(tf.zeros((neurons_h1)),dtype= tf.float32,name = 'b1_fc')
+    b2_fc = tf.Variable(tf.zeros((n_outputs)),dtype = tf.float32,name = 'b2_fc')
+    
+    # weights and bias for sparse_ae combination fully connected
+    w1 = tf.Variable(wt_init([n_x,neurons_h1]), dtype = tf.float32,name = 'w1')
+    w2 = tf.Variable(wt_init([neurons_h1,n_outputs]),dtype=tf.float32,name = 'w2')
+    
+    w_ae = tf.Variable(wt_init([neurons_h1,n_x]),dtype=tf.float32, name='w_ae')
+    
+    b1 = tf.Variable(tf.zeros(neurons_h1),dtype = tf.float32, name = 'b1')
+    b2 = tf.Variable(tf.zeros(n_outputs),dtype=tf.float32,name = 'b2')
+    
+    b_ae = tf.Variable(tf.zeros(n_x),dtype=tf.float32,name = 'b_ae')
+    
+    parameters = {
+            'w1':w1,
+            'w2':w2,
+            'w1_fc':w1_fc,
+            'w2_fc':w2_fc,
+            'w_ae':w_ae,
+            'b1':b1,
+            'b2':b2,
+            'b1_fc':b1_fc,
+            'b2_fc':b2_fc,
+            'b_ae':b_ae}
+    return parameters
+    
+def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e-3,rho=0.1,beta=3):
+    
+    # tensorflow essentials
+    tf.reset_default_graph()
+    tf.set_random_seed(1)
+    init = tf.global_variables_initializer()
+    
+    # getting the dimensions from the tr_x and tr_y
+    m = tr_x.shape[0]
+    n_x = tr_x.shape[1]
+    n_y = np.max(tr_y)-np.min(tr_y) + 1
+    
+    # initialising cost list for different costs
+    cost_fc_li = []
+    cost_ae_li = []
+    cost_ae_fc_li = []
+    
+    # creating placeholders for the graph
+    x_ph,y_ph = create_placeholder(n_x)
+    
+    # parameter initialisation
+    parameters = initialise_parameter(n_x,n_y)
 
 if __name__ == '__main__':
     
@@ -37,5 +105,5 @@ if __name__ == '__main__':
     tr_y = tr_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
     te_y = te_y.reshape(-1,1) # reshaping from (1000,) to (1000,1)
     
-    
+    model(tr_x,tr_y,te_x,te_y)
     
