@@ -25,7 +25,7 @@ def initialise_parameter(n_x,n_y):
     tf.set_random_seed(1)
     
     neurons_h1 = 200
-    n_outputs = n_y
+    n_outputs = int(n_y)
     
     # fully connected weights and bias
     w1_fc = tf.Variable(wt_init([n_x,neurons_h1]),dtype = tf.float32,name = 'w1_fc')
