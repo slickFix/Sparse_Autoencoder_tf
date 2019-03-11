@@ -172,10 +172,10 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
             if (epoch+1)%200 == 0:
                 print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_ae))
         
-        print('Training softmax with classifier with autoencoder feature representation.')
+        print('Training softmax classifier with autoencoder feature representation.')
         for epoch in range(epochs):
             
-            _,c_ae_fc = sess.run([optimizer_ae_fc,cost_ae_fc],feed_dict={x_ph:tr_x})
+            _,c_ae_fc = sess.run([optimizer_ae_fc,cost_ae_fc],feed_dict={x_ph:tr_x,y_ph:tr_y})
             cost_ae_fc_li.append(c_ae_fc)
             
             if (epoch+1)%200 == 0:
@@ -184,7 +184,7 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
         print('Training fully connected(fc) network of dimensions [784,200,10].')
         for epoch in range(epochs):
             
-            _,c_fc = sess.run([optimizer_fc,cost_fc],feed_dict={x_ph:tr_x})
+            _,c_fc = sess.run([optimizer_fc,cost_fc],feed_dict={x_ph:tr_x,y_ph:tr_y})
             cost_fc_li.append(c_fc)
             
             if (epoch+1)%200 == 0:
