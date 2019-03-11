@@ -77,12 +77,53 @@ def fwd_propagation(x_ph,parameters):
     logits_fc = tf.add(tf.matmul(l1_act_fc,w2_fc),b2_fc)
     
     l1 = tf.add(tf.matmul(x_ph,w1),b1)
-    l1_act = tf.nn.relu(l1)    
+    l1_act = tf.nn.sigmoid(l1)    
     logits = tf.add(tf.matmul(l1_act,w2),b2)
     
     x_hat = tf.nn.sigmoid(tf.add(tf.matmul(l1_act,w_ae),b_ae))
     
-    return logits_fc,logits,x_hat
+    return logits_fc,logits,x_hat,l1_act
+  
+def compute_cost_fc(logits_fc,y_ph,parameters,reg_term_lambda):
+    
+    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_ph,logits=logits_fc)
+    
+    #w1_fc = parameters['w1_fc']
+    #w2_fc = parameters['w2_fc']
+    #loss+= reg_term_lambda*(tf.nn.l2_loss(w1_fc) + tf.nn.l2_loss(w2_fc))
+    
+    return tf.reduce_mean(loss)
+
+def compute_cost_ae_fc(logits,y_ph,parameters,reg_term_lambda):
+    
+    loss = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_ph,logits=logits)
+    
+    #w1 = parameters['w1'] 
+    #w2 = parameters['w2']
+    #loss+= reg_term_lambda*(tf.nn.l2_loss(w1) + tf.nn.l2_loss(w2))
+    
+    return tf.reduce_mean(loss)
+
+def kl_divergence(p,p_hat):
+    return p*tf.log(p)-p*tf.log(p_hat) + (1-p)*tf.log(1-p)-(1-p)*tf.log(1-p_hat)
+
+
+def compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta):
+    
+    diff = x_hat - x_ph   
+    
+    p_hat = tf.reduce_mean(tf.clip_by_value(l1_act,1e-10,1.0,name='clipper'),axis=0)
+    kl = kl_divergence(rho,p_hat)
+    
+    w1 = parameters['w1']
+    w_ae = parameters['w_ae'] 
+    l2_loss = reg_term_lambda*(tf.nn.l2_loss(w1)+tf.nn.l2_loss(w_ae))
+    
+    loss = tf.reduce_mean(tf.reduce_sum(diff** 2,axis=1)+beta*kl+l2_loss)
+    
+    return loss
+    
+    
     
 def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e-3,rho=0.1,beta=3):
     
@@ -108,7 +149,12 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 10,reg_term_lambda=1e
     parameters = initialise_parameter(n_x,n_y)
     
     # getting logits of 3 different NN
-    logits_fc,logits,x_hat = fwd_propagation(x_ph,parameters)
+    logits_fc,logits,x_hat,l1_act = fwd_propagation(x_ph,parameters) #l1_act used in cost_ae
+    
+    # cost calculations
+    cost_fc = compute_cost_fc(logits_fc,y_ph,parameters,reg_term_lambda)
+    cost_ae_fc = compute_cost_ae_fc(logits,y_ph,parameters,reg_term_lambda)
+    cost_ae = compute_cost_ae(x_hat,x_ph,parameters,reg_term_lambda,l1_act,rho,beta)
 
 if __name__ == '__main__':
     
