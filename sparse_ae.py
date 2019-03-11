@@ -188,7 +188,15 @@ def model(tr_x,tr_y,te_x,te_y,learning_rate =1e-3,epochs = 1000,reg_term_lambda=
             
             if (epoch+1)%200 == 0:
                 print("Epoch: ",(epoch+1),"cost = ","{:.3f}".format(c_fc))
-         
+        
+        correct_pred_ae_fc = tf.equal(tf.argmax(logits,axis=1),y_ph)
+        acc_ae_fc = tf.reduce_mean(tf.cast(correct_pred_ae_fc,'float'))
+        
+        correct_pred_fc = tf.equal(tf.argmax(logits_fc),y_ph)
+        acc_fc = tf.reduce_mean(tf.cast(correct_pred_fc,'float'))
+        
+        print("Accuracy of fc NN on test set",acc_fc.eval({x_ph:te_x,y_ph:te_y}))
+        print("Accuracy of ae feature fc NN on test set",acc_ae_fc.eval({x_ph:te_x,y_ph:te_y}) )
         
 
 if __name__ == '__main__':
